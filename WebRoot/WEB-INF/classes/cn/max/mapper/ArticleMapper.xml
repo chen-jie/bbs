@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.max.mapper.ArticleMapper">
+	<resultMap id="BaseResultMap" type="cn.max.vo.Article">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="category_id" property="categoryId" jdbcType="INTEGER" />
+		<result column="view_count" property="viewCount" jdbcType="INTEGER" />
+		<result column="reply_count" property="replyCount" jdbcType="INTEGER" />
+		<result column="last_reply_time" property="lastReplyTime"
+			jdbcType="TIMESTAMP" />
+	</resultMap>
+	<resultMap id="BaseResultMap2" type="cn.max.vo.Article" extends="BaseResultMap">
+		<result column="author_name" property="authorName" jdbcType="VARCHAR"/>
+		<result column="icon_url" property="iconUrl" jdbcType="VARCHAR"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, title, publish_time, user_id, category_id, view_count, reply_count,
+		last_reply_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from article
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from article
+	</select>
+	<select id="selectByExample" resultMap="BaseResultMap2" parameterType="cn.max.vo.ArticleQuery">
+		select
+			a.*,u.username author_name,u.icon_url
+		from article a,user u
+		<where>
+			<if test="id != null">
+				id=#{id}
+			</if>
+			<if test="title != null">
+				and title like concat('%',#{title},'%')
+			</if>
+			<if test="publishTime != null">
+				and publish_time = #{publishTime}
+			</if>
+			<if test="userId != null">
+				and user_id = #{userId}
+			</if>
+			<if test="categoryId != null">
+				and category_id = #{categoryId}
+			</if>
+			<if test="viewCount != null">
+				and view_count = #{viewCount}
+			</if>
+			<if test="replyCount != null">
+				and reply_count = #{replyCount}
+			</if>
+			<if test="lastReplyTime != null">
+				and last_reply_time = #{lastReplyTime}
+			</if>
+				and a.user_id = u.id
+		</where>
+		order by last_reply_time desc limit #{first},#{pageSize} 
+	</select>
+	<select id="selectCountByCgId" parameterType="java.lang.Integer" resultType="java.lang.Integer" >
+		select count(*) from article 
+		<if test="_parameter!=null">
+			where category_id = #{_parameter}
+		</if>
+	</select>
+	<select id="selectWithPage" resultMap="BaseResultMap2">
+		select
+			a.*,u.username author_name
+			from article a,user u where a.category_id =#{cid} and a.user_id = u.id 
+			order by last_reply_time desc limit #{first},#{size} 
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from article
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="cn.max.vo.Article" useGeneratedKeys="true" keyProperty="id">
+		insert into article (id, title, publish_time,
+		user_id, category_id, view_count,
+		reply_count, last_reply_time)
+		values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR},
+		#{publishTime,jdbcType=TIMESTAMP},
+		#{userId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{viewCount,jdbcType=INTEGER},
+		#{replyCount,jdbcType=INTEGER}, #{lastReplyTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="cn.max.vo.Article">
+		insert into article
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="publishTime != null">
+				publish_time,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="categoryId != null">
+				category_id,
+			</if>
+			<if test="viewCount != null">
+				view_count,
+			</if>
+			<if test="replyCount != null">
+				reply_count,
+			</if>
+			<if test="lastReplyTime != null">
+				last_reply_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="publishTime != null">
+				#{publishTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="categoryId != null">
+				#{categoryId,jdbcType=INTEGER},
+			</if>
+			<if test="viewCount != null">
+				#{viewCount,jdbcType=INTEGER},
+			</if>
+			<if test="replyCount != null">
+				#{replyCount,jdbcType=INTEGER},
+			</if>
+			<if test="lastReplyTime != null">
+				#{lastReplyTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="cn.max.vo.Article">
+		update article
+		<set>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="publishTime != null">
+				publish_time = #{publishTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="categoryId != null">
+				category_id = #{categoryId,jdbcType=INTEGER},
+			</if>
+			<if test="viewCount != null">
+				view_count = #{viewCount,jdbcType=INTEGER},
+			</if>
+			<if test="replyCount != null">
+				reply_count = #{replyCount,jdbcType=INTEGER},
+			</if>
+			<if test="lastReplyTime != null">
+				last_reply_time = #{lastReplyTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="cn.max.vo.Article">
+		update article
+		set title = #{title,jdbcType=VARCHAR},
+		publish_time = #{publishTime,jdbcType=TIMESTAMP},
+		user_id = #{userId,jdbcType=INTEGER},
+		category_id = #{categoryId,jdbcType=INTEGER},
+		view_count = #{viewCount,jdbcType=INTEGER},
+		reply_count = #{replyCount,jdbcType=INTEGER},
+		last_reply_time = #{lastReplyTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>
